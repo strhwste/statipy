@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from datetime import timedelta
 from os import listdir
@@ -51,17 +52,36 @@ class MyData:
 
     # data loaders (from file)
     def _load_streaming_history(self):
-        files = list(filter(lambda x: x.startswith('StreamingHistory'), listdir(self._root)))
+        files = list(filter(lambda x: x.startswith('Streaming_History'), listdir(self._root)))
         files.sort()
 
         all_ = []
         for file in files:
             with open(self._root + file, encoding='UTF-8') as f:
-                all_ += eval(f.read())
+                data = json.load(f)
+                for item in data:
+                    # Filter out podcasts and audiobooks
+                    if (item.get('master_metadata_track_name') 
+                        and not item.get('episode_name') 
+                        and not item.get('audiobook_title')):
+                        
+                        all_.append({
+                            'endTime': item['ts'],
+                            'artistName': item['master_metadata_album_artist_name'],
+                            'albumName': item['master_metadata_album_album_name'],
+                            'trackName': item['master_metadata_track_name'],
+                            'msPlayed': item['ms_played'],
+                            'platform': item['platform'],
+                            'connCountry': item['conn_country'],
+                            'reasonStart': item['reason_start'],
+                            'reasonEnd': item['reason_end'],
+                            'shuffle': item['shuffle'],
+                            'skipped': item['skipped']
+                        })
 
         # Convert string timestamps to time objects
         for h in all_:
-            h['endTime'] = strptime(h['endTime'], '%Y-%m-%d %H:%M')
+            h['endTime'] = strptime(h['endTime'], '%Y-%m-%dT%H:%M:%SZ')
             h['msPlayed'] = timedelta(milliseconds=h['msPlayed'])
 
         return all_
@@ -84,7 +104,9 @@ class MyData:
         return all_
 
     def _load_my_library(self):
-        with open(self._root + 'YourLibrary.json', encoding='UTF-8') as f:
-            all_ = eval(f.read())
-
-        return all_['tracks'], all_['albums'], all_['shows'], all_['episodes'], all_['artists']
+        try:
+            with open(self._root + 'YourLibrary.json', encoding='UTF-8') as f:
+                all_ = eval(f.read())
+            return all_['tracks'], all_['albums'], all_['shows'], all_['episodes'], all_['artists']
+        except FileNotFoundError:
+            return [], [], [], [], []

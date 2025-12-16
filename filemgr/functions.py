@@ -5,7 +5,7 @@ from .data import MyData
 
 
 def _extract_data(path: str) -> None:
-    if not os.path.exists('MyData'):
+    if not os.path.exists('Spotify Extended Streaming History'):
         with ZipFile(path) as zip_:
             # todo: check extracted location & modifiable root path
             zip_.extractall()
@@ -18,6 +18,4 @@ def load_zipped_data(path: str = 'my_spotify_data.zip') -> MyData:
     :param path: relative path to zip file ('my_spotify_data.zip' default)
     """
     _extract_data(path)
-
-    # todo: modifiable root path
-    return MyData()
+    return MyData(root_path='Spotify Extended Streaming History/')

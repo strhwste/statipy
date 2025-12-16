@@ -28,5 +28,12 @@ class PlayList(TypedDict):
 class History(TypedDict):
     endTime: struct_time  # str  # yyyy-mm-dd HH:MM
     artistName: str
+    albumName: str
     trackName: str
     msPlayed: timedelta  # int
+    platform: str
+    connCountry: str
+    reasonStart: str
+    reasonEnd: str
+    shuffle: bool
+    skipped: bool

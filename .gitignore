@@ -132,3 +132,8 @@ dmypy.json
 *.zip
 MyData/
 /MyData/
+Spotify Extended Streaming History/
+*.pdf
+*.csv
+stats_report.html
+stats_report.md
